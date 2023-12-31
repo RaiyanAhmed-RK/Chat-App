@@ -27,9 +27,15 @@ const Auth = class {
       .then((data) => {
         console.log(data);
         if (data.error) {
-          alert(data.error);
+          onerr({
+            body: "please enter username and password",
+            tittle: "input",
+          });
         } else {
-          alert(data.message);
+          onerr({
+            body: data.tittle,
+            tittle: data.message,
+          });
           console.log(username);
         }
       });
@@ -42,14 +48,53 @@ const Auth = class {
     confirmPassword,
     remember,
     email,
-    onClose,
+    onerr,
+    onOpenChange,
   ) {
     console.log("password: ", password, "confirmPassword: ", confirmPassword);
+    if (
+      !username ||
+      !firstName ||
+      !lastName ||
+      !password ||
+      !confirmPassword ||
+      !email
+    ) {
+      onerr({
+        body: "Please fill in all required fields.",
+        title: "Incomplete Information",
+      });
+      console.log("Incomplete Information");
+      return false;
+    }
+
+    // Password length check
+    if (password.length <= 8) {
+      onerr({
+        body: "Password must be more than 8 characters long.",
+        title: "Short Password",
+      });
+      return false;
+    }
+
+    // Password match check
     if (password !== confirmPassword) {
-      alert("Passwords don't match");
-      set;
+      onerr({ body: "Passwords do not match.", title: "Password Mismatch" });
+      return false;
+    }
+
+    // Email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      onerr({ body: "Invalid email format.", title: "Invalid Email" });
+      return false;
+    }
+    if (username === "" || password === "") {
+      onerr({ body: "please enter username and password", tittle: "input" });
+      console.log("username and password are required");
       return;
     }
+
     try {
       const response = await fetch(URL + "/signup", {
         method: "POST",
@@ -71,14 +116,26 @@ const Auth = class {
         console.log("User registered successfully!");
         const data = await response.json();
         console.log("sign up response: ", data.message);
+        if (!data.success) {
+          onerr({ body: data.message, title: "Failed" });
+          return;
+        }
         alert(data.message, " sign up successfull!");
-        onClose();
+        onOpenChange();
       } else {
+        onerr({
+          body: "Failed",
+          title: "Something went wrong, please try again. <Server!> ",
+        });
         // Handle registration failure (e.g., display error message)
         console.error("Registration failed");
       }
     } catch (error) {
       console.error("Error during registration:", error);
+      onerr({
+        body: "Failed",
+        title: "Something went wrong, please try again. <Client!> ",
+      });
     }
   }
 

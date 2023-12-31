@@ -24,6 +24,13 @@ export default function SignUpButton({ name }) {
   const [lastName, setlastName] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
   const [email, setemail] = useState("");
+  const {
+    isOpen: isErr,
+    onOpen: onErr,
+    onOpenChange: onErrChange,
+  } = useDisclosure();
+  const [ErrTittle, setErrTittle] = useState("Error");
+  const [ErrBody, setErrBody] = useState("An unexpected error occured");
 
   return (
     <>
@@ -133,13 +140,40 @@ export default function SignUpButton({ name }) {
                           confirmPassword,
                           remember,
                           email,
-                          onClose,
+                          (err) => {
+                            setErrTittle(err.tittle);
+                            setErrBody(err.body);
+                            onErrChange();
+                          },
+                          onOpenChange,
                         );
                       }
                       // close Modal
                     }
                   >
                     Sign Up
+                  </Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+        <Modal
+          isOpen={isErr}
+          onOpenChange={onErrChange}
+          className="dark"
+          placement={"center"}
+        >
+          <ModalContent>
+            {(onErr) => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">
+                  {ErrTittle}
+                </ModalHeader>
+                <ModalBody>{ErrBody}</ModalBody>
+                <ModalFooter>
+                  <Button color="danger" variant="light" onPress={onErr}>
+                    Close
                   </Button>
                 </ModalFooter>
               </>

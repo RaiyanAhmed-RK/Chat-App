@@ -32,8 +32,8 @@ app.post("/api/login", (req, res) => {
   if (!auth({ username, password })) {
     res.send(
       JSON.stringify({
-        message: "login failed",
-        reason: "username or password is incorrect",
+        tittle: "login failed",
+        message: "username or password is incorrect",
       }),
     );
     return;
@@ -80,6 +80,7 @@ app.post("/api/signup", (req, res) => {
       JSON.stringify({
         message: "signup failed",
         reason: "username already exists",
+        success: false,
       }),
     );
     return;

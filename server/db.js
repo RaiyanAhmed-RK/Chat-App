@@ -23,5 +23,22 @@ const signup = async (username, password, firstName, lastName, email) => {
   console.log("pushed to db");
 };
 
+// make a function to check weather the username or email is already taken
+const checkUser = async (username, email) => {
+  console.log("checking user");
+  const data = {
+    username: username,
+    email: email,
+  };
+  try {
+    const record = await pb.collection("users").read(data);
+    console.log("user found");
+    return true;
+  } catch (err) {
+    console.log("user not found");
+    return false;
+  }
+};
+
 const login = async (username, password) => {};
 export { signup };

@@ -1,3 +1,5 @@
+const URL = "http://localhost:6969/api";
+
 const Auth = class {
   constructor() {
     this.authenticated = false;
@@ -6,7 +8,7 @@ const Auth = class {
     console.log("user: ", username, "password: ", password);
 
     // make a login request
-    fetch(URL + "login/", {
+    fetch(URL + "/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -15,6 +17,7 @@ const Auth = class {
         username: username,
         password: password,
       }),
+      credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
@@ -34,14 +37,16 @@ const Auth = class {
     password,
     confirmPassword,
     remember,
+    email,
     onClose,
   ) {
+    console.log("password: ", password, "confirmPassword: ", confirmPassword);
     if (password !== confirmPassword) {
       alert("Passwords don't match");
       return;
     }
     try {
-      const response = await fetch("http://localhost:6969/api/signup", {
+      const response = await fetch(URL + "/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,6 +57,7 @@ const Auth = class {
           lastName,
           password,
           remember,
+          email,
         }),
       });
 
@@ -72,7 +78,7 @@ const Auth = class {
   }
 
   isAuthenticated() {
-    fetch("http://localhost:6969/api/greet", {
+    fetch(URL + "/greet", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -85,11 +91,29 @@ const Auth = class {
           alert(data.error);
         } else {
           alert(data.message);
-          console.log(data.username); // Assuming you want to log the username from the response
+          console.log(data.username);
         }
       });
-
     return this.authenticated;
+  }
+  greet() {
+    fetch(URL + "/greet", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert(data.message);
+          console.log(data.username);
+        }
+      });
   }
 };
 

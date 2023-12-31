@@ -23,6 +23,7 @@ export default function SignUpButton({ name }) {
   const [firstName, setfirstName] = useState("");
   const [lastName, setlastName] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
+  const [email, setemail] = useState("");
 
   return (
     <>
@@ -73,6 +74,13 @@ export default function SignUpButton({ name }) {
                     onValueChange={setusername}
                   />
                   <Input
+                    label="Email"
+                    placeholder="Email address"
+                    variant="bordered"
+                    value={email}
+                    onValueChange={setemail}
+                  />
+                  <Input
                     endContent={
                       <LockIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
                     }
@@ -119,11 +127,12 @@ export default function SignUpButton({ name }) {
                       async () => {
                         auth.signup(
                           username,
-                          password,
-                          confirmPassword,
                           firstName,
                           lastName,
+                          password,
+                          confirmPassword,
                           remember,
+                          email,
                           onClose,
                         );
                       }

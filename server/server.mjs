@@ -1,37 +1,35 @@
 import cors from "cors";
 import express from "express";
-import path from "path";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { signup } from "./db.js";
 const app = express();
+const port = process.env.PORT || 6969;
+
+// Get the directory name using __dirname
+const __dirname = path.resolve();
+
+// Serve static files from the 'dist' folder
+app.use(express.static(path.join(__dirname, "dist")));
 app.use(express.json());
+
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Replace with your frontend domain/port
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true, // Enable credentials (if your fetch requests include credentials)
-  }),
-);
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
-app.get("/", (req, res) => {
-  res.send("hello there, server is online ");
+
+app.get("/api", (req, res) => {
+  res.send("Hello there, the server is online and api");
 });
 
-// to perform action for login requests
-app.post("/api/login", async (req, res) => {
-  console.log("login request: ", req.body);
-  let username = req.body.username;
-  let password = req.body.password;
-  //let result = await db.login(username, password);
-  console.log("login request: ", username, " | ", password);
-  console.log("login user cookie: ", req.cookies.user);
-  let user = { username: username, password: password };
-  if (!auth(user)) {
+// Login endpoint
+app.post("/api/login", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  try {
+    console.log("cookies recieved: " + req.cookies.user_session_id);
+  } catch (err) {
+    console.log("error: " + err);
+  }
+  // Simulating authentication
+  if (!auth({ username, password })) {
     res.send(
       JSON.stringify({
         message: "login failed",
@@ -40,29 +38,43 @@ app.post("/api/login", async (req, res) => {
     );
     return;
   }
+
   const user_session_id = generateSessionId(20);
+
+  // Set the cookie without 'httpOnly: true'
   res.cookie("user_session_id", user_session_id, {
     maxAge: 900000,
-    httpOnly: true,
   });
 
   addSession({ username: req.body.username, sessionId: user_session_id });
+
   res.send(
-    JSON.stringify({ message: "login Success", cook: req.cookies.user }),
+    JSON.stringify({
+      message: "login Success",
+      cookie: user_session_id,
+    }),
   );
 });
 
+// Greet endpoint
 app.get("/api/greet", (req, res) => {
-  user_session_id.forEach((element) => {
-    if (element.sessionId === req.cookies.user_session_id) {
-      res.send(JSON.stringify({ message: "hello there, user" }));
-    }
-  });
-  res.send(JSON.stringify({ message: "are you user?" }));
+  const sessionId = req.cookies.user_session_id;
+
+  // Simulating checking user session
+  const foundUser = user_session_id.find(
+    (user) => user.sessionId === sessionId,
+  );
+
+  if (foundUser) {
+    res.send(JSON.stringify({ message: "Hello there, user" }));
+  } else {
+    res.send(JSON.stringify({ message: "Are you a user?" }));
+  }
 });
-// sign up
-app.post("/api/signup", async (req, res) => {
-  console.log("========================================================");
+
+// Signup endpoint
+app.post("/api/signup", (req, res) => {
+  console.log("progress started to add user");
   if (checkUser(req.body.username)) {
     res.send(
       JSON.stringify({
@@ -72,69 +84,81 @@ app.post("/api/signup", async (req, res) => {
     );
     return;
   }
+
   try {
-    let user = {
-      firstname: req.body.firstName,
-      lastname: req.body.lastName,
+    const user = {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
       username: req.body.username,
       password: req.body.password,
       remember: req.body.remember,
+      email: req.body.email,
     };
-    addUser(user);
+
+    users.push(user);
+    console.log("database push started :", user);
+    signup(
+      user.username,
+      user.password,
+      user.firstName,
+      user.lastName,
+      user.email,
+    );
+    console.log("database push finished");
   } catch (err) {
     res.send(
       JSON.stringify({
         message: "signup failed",
-        reason: "required data hasnt given",
+        reason: "required data hasn't been provided",
       }),
     );
+    return;
   }
+
   const user_session_id = generateSessionId(20);
+
+  // Set the cookie without 'httpOnly: true'
   res.cookie("user_session_id", user_session_id, {
     maxAge: 900000,
-    httpOnly: true,
   });
+
   addSession({ username: req.body.username, sessionId: user_session_id });
+
   res.send(JSON.stringify({ message: "signup Success" }));
 });
-app.delete("/api/login", async (req, res) => {
+
+// Logout endpoint
+app.delete("/api/login", (req, res) => {
   console.log("logout request: ", req.cookies.user);
   res.clearCookie("user_session_id");
-  const index = user_session_id.indexOf(
+
+  const index = user_session_id.findIndex(
     (element) => element.username === req.body.user,
   );
+
   if (index > -1) {
     user_session_id.splice(index, 1);
   }
+
   res.send(JSON.stringify({ message: "logout Success" }));
 });
 
+// Additional functions
 const auth = (user) => {
-  for (let i = 0; i < users.length; i++) {
-    if (
-      users[i].username === user.username &&
-      users[i].password === user.password
-    )
-      return true;
-  }
-  return false;
-};
-
-const addUser = (user) => {
-  users.push(user);
+  return users.some(
+    (u) => u.username === user.username && u.password === user.password,
+  );
 };
 
 const users = [];
 const user_session_id = [];
+
 const addSession = (user) => {
   user_session_id.push(user);
 };
 
 const checkUser = (username) => {
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].username === username) return true;
-  }
-  return false;
+  return users.some((u) => u.username === username);
 };
 
 app.listen(6969, () => {

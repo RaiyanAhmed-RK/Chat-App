@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@nextui-org/react";
 import LoginButton from "./ui/LoginButton";
 import SignUpButton from "./ui/SignUpButton";
-
+import auth from "./ui/jsmod/auth.js";
 export default class Home extends Component {
   render() {
     return (
@@ -17,6 +17,17 @@ export default class Home extends Component {
           <div className="flex block mx-auto mt-2">
             <LoginButton name={"Login"} />
             <SignUpButton name={"Sign Up"} />
+            <Button
+              onPress={() => {
+                console.log("hello");
+                auth.greet();
+              }}
+              color="primary"
+              variant="shadow"
+              className="hover:bg-transparent hover:text-primary m-3"
+            >
+              Greet!
+            </Button>
           </div>
         </div>
       </>

@@ -1,4 +1,5 @@
 import React from "react";
+import Logo from "./ui/logo.jsx";
 import {
   Navbar,
   NavbarBrand,
@@ -65,15 +66,11 @@ export default function App() {
         />
         <NavbarBrand>
           <Link to="/" className="flex items-center gap-1">
-            <img src={logo} alt="no logo" className="pr-3" />
+            <Logo />
             <h1 className="font-bold text-inherit text-3xl">R-Chat</h1>
           </Link>
         </NavbarBrand>
       </NavbarContent>
-      {/* <NavbarBrand>
-                <img src={logo} alt="no logo" className="pr-3" />
-                <p className="font-bold text-inherit">R-chat</p>
-            </NavbarBrand> */}
       <NavbarContent className="hidden sm:flex gap-4 dark" justify="center">
         <NavbarItem>
           <Link color="" to="/contact">

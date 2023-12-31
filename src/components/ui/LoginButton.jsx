@@ -19,6 +19,13 @@ export default function App({ name }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [username, setusername] = useState("");
   const [password, setpassword] = useState("");
+  const {
+    isOpen: isErr,
+    onOpen: onErr,
+    onOpenChange: onErrChange,
+  } = useDisclosure();
+  const [ErrTittle, setErrTittle] = useState("Error");
+  const [ErrBody, setErrBody] = useState("An unexpected error occured");
   return (
     <>
       <div>
@@ -87,12 +94,38 @@ export default function App({ name }) {
                     onPress={
                       (onClose,
                       () => {
-                        auth.login(username, password);
+                        auth.login(username, password, (err) => {
+                          setErrTittle(err.tittle);
+                          setErrBody(err.body);
+                          onErrChange();
+                        });
                         console.log("fetched");
                       })
                     }
                   >
                     Log in
+                  </Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+        <Modal
+          isOpen={isErr}
+          onOpenChange={onErrChange}
+          className="dark"
+          placement={"center"}
+        >
+          <ModalContent>
+            {(onErr) => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">
+                  {ErrTittle}
+                </ModalHeader>
+                <ModalBody>{ErrBody}</ModalBody>
+                <ModalFooter>
+                  <Button color="danger" variant="light" onPress={onErr}>
+                    Close
                   </Button>
                 </ModalFooter>
               </>

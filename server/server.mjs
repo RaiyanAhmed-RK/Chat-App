@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, "dist")));
 app.use(express.json());
 
 app.use(cookieParser());
-
+app.use(cors({ origin: "http://localhost:6968", credentials: true }));
 app.get("/api", (req, res) => {
   res.send("Hello there, the server is online and api");
 });
@@ -58,18 +58,24 @@ app.post("/api/login", (req, res) => {
 
 // Greet endpoint
 app.get("/api/greet", (req, res) => {
-  const sessionId = req.cookies.user_session_id;
-
-  // Simulating checking user session
-  const foundUser = user_session_id.find(
-    (user) => user.sessionId === sessionId,
-  );
-
-  if (foundUser) {
-    res.send(JSON.stringify({ message: "Hello there, user" }));
-  } else {
-    res.send(JSON.stringify({ message: "Are you a user?" }));
+  console.log("----------------------------------------------------------");
+  try {
+    const sessionId = req.cookies.user_session_id;
+    console.log("session cookie: " + sessionId);
+    console.log("cookie resources: ", req.cookies);
+  } catch (error) {
+    console.log("----------------------------------------------------------");
+    console.log("error while taking cookies : " + error);
   }
+  if (req.cookies.user_session_id) {
+    res.send(
+      JSON.stringify({
+        message: "Hello there, i got cookies mr. ",
+      }),
+    );
+    return;
+  }
+  res.send(JSON.stringify({ message: "cookies i need cookies" }));
 });
 
 // Signup endpoint
@@ -152,7 +158,7 @@ const auth = (user) => {
 };
 
 const users = [];
-const user_session_id = [];
+const user_session_ids = [];
 
 const addSession = (user) => {
   user_session_id.push(user);

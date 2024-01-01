@@ -1,5 +1,7 @@
 const URL = "http://localhost:6969/api";
 
+import axios from "axios";
+
 const Auth = class {
   constructor() {
     this.authenticated = false;
@@ -96,19 +98,14 @@ const Auth = class {
     }
 
     try {
-      const response = await fetch(URL + "/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          firstName,
-          lastName,
-          password,
-          remember,
-          email,
-        }),
+      // replace response with axios
+      const response = await axios.post(URL + "/signup", {
+        username,
+        firstName,
+        lastName,
+        password,
+        remember,
+        email,
       });
 
       if (response.ok) {
@@ -134,7 +131,7 @@ const Auth = class {
       console.error("Error during registration:", error);
       onerr({
         body: "Failed",
-        title: "Something went wrong, please try again. <Client!> ",
+        tittle: "Something went wrong, please try again. <Client!> ",
       });
     }
   }
@@ -158,23 +155,24 @@ const Auth = class {
       });
     return this.authenticated;
   }
+  // repace this greet method with fetch to axios , i found axios easier to use
   greet() {
-    fetch(URL + "/greet", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        if (data.error) {
-          alert(data.error);
-        } else {
-          alert(data.message);
-          console.log(data.username);
-        }
+    axios
+      .get("/api/greet", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      })
+      .then((res) => {
+        console.log(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        console.log("request completed");
       });
   }
 };
